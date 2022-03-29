@@ -1,10 +1,12 @@
 package com.leslydp.surveylib
 
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,23 +28,62 @@ fun JetsurveyScreen(
     //var checkedState by remember{mutableStateOf(false)}
 
     list.forEach { question ->
-        var respuesta: ArrayList<Byte> = ArrayList<Byte>()
-        question.options.forEach {
-            respuesta.add(0)
-        }
-        Log.d("tag", question.options.size.toString())
-        when (question.id) {
-            1 -> {
-                MultipleChoiceQuestion(question.options, onAnswerSelected = { idq, valor ->
-                    val compareTo = valor.compareTo(false)
-                    respuesta.set(idq, compareTo.toByte())
-                    Log.d("myTag", respuesta.toString())
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp)
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(32.dp))
+                QuestionTitle(question.questionName)
+                Spacer(modifier = Modifier.height(24.dp))
+                var respuesta: ArrayList<Byte> = ArrayList<Byte>()
+                question.options.forEach {
+                    respuesta.add(0)
+                }
+                Log.d("myTag2", question.questionName)
+                //QuestionTitle(question.questionName)
+                Log.d("tag", question.options.size.toString())
+                when (question.id) {
+                    1 -> {
+                        MultipleChoiceQuestion(question.options, onAnswerSelected = { idq, valor ->
+                            val compareTo = valor.compareTo(false)
+                            respuesta.set(idq, compareTo.toByte())
+                            Log.d("myTag", respuesta.toString())
 
-                })
+                        })
+                    }
+                }
             }
         }
     }
 
+}
+
+@Composable
+private fun QuestionTitle(title: String) {
+    val backgroundColor = if (MaterialTheme.colors.isLight) {
+        MaterialTheme.colors.onSurface.copy(alpha = 0.04f)
+    } else {
+        MaterialTheme.colors.onSurface.copy(alpha = 0.06f)
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = backgroundColor,
+                shape = MaterialTheme.shapes.small
+            )
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.subtitle1,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 24.dp, horizontal = 16.dp)
+        )
+    }
 }
 
 @Composable
