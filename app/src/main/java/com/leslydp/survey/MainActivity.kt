@@ -25,10 +25,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    var ans: String
+                    var ans: Array<String>
                     var options = listOf<String>("option 1", "option 2", "option 3","option 4")
                     val preguntas= listOf<Question>(
-                        Question(id = 1, "hola",options)
+                        Question(id = 2, "hola",options)
                     )
 
                     JetsurveyScreen(preguntas) { answer ->

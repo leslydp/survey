@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.leslydp.surveylib.model.Answer
 import com.leslydp.surveylib.model.Question
@@ -156,5 +157,61 @@ private fun MultipleChoiceQuestion(
                 }
             }
         }
+    }
+}
+
+
+@Composable
+private fun SliderQuestion(
+    //possibleAnswer: PossibleAnswer.Slider,
+    //answer: Answer.Slider?,
+    options: List<String>,
+    onAnswerSelected: (Float) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var sliderPosition by remember {
+        mutableStateOf(0f)
+    }
+    Row(modifier = modifier) {
+
+        Slider(
+            value = sliderPosition,
+            onValueChange = {
+                sliderPosition = it
+                onAnswerSelected(it)
+            },
+            valueRange = 0f..100f,
+            steps = options.size,
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp)
+        )
+    }
+    Row {
+        for(option in options)
+        Text(
+            text = option,
+            style = MaterialTheme.typography.caption,
+            textAlign = TextAlign.Start,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1.8f)
+        )
+       /* Text(
+            text = stringResource(id = possibleAnswer.neutralText),
+            style = MaterialTheme.typography.caption,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1.8f)
+        )
+        Text(
+            text = stringResource(id = possibleAnswer.endText),
+            style = MaterialTheme.typography.caption,
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1.8f)
+        )*/
     }
 }
