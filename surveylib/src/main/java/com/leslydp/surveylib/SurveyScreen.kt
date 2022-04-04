@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -48,18 +49,35 @@ fun JetsurveyScreen(
                 Log.d("tag", question.options.size.toString())
                 when (question.id) {
                     1 -> {
+                        val respuesta = mutableListOf<Byte>()
+
                         MultipleChoiceQuestion(question.options, onAnswerSelected = { idq, valor ->
                             val compareTo = valor.compareTo(false)
-                            respuesta.set(idq, compareTo.toByte())
+                            respuesta[idq] = compareTo.toByte()
                             Log.d("myTag", respuesta.toString())
 
                         })
                     }
+                    2 -> {
+                        val respuesta = mutableListOf<Byte>()
+
+                        SingleChoiceQuestion(question.options, onAnswerSelected = { id ->
+                            if (respuesta.indexOf(1) > -1)
+                                respuesta[respuesta.indexOf(1)] = 0
+                            respuesta[id]=1
+                            Log.d("myTag", respuesta.toString())
+
+                        })
+                    }
+                    3 -> 
+                        SliderQuestion(question.options, onAnswerSelected = {
+                            Log.d("slider",it.toString())
+                        })
+
                 }
             }
         }
     }
-
 }
 
 @Composable
@@ -89,23 +107,14 @@ private fun QuestionTitle(title: String) {
 
 @Composable
 private fun MultipleChoiceQuestion(
-    //possibleAnswer: PossibleAnswer.MultipleChoice,
-    //answer: Answer.MultipleChoice?,
+
     options: List<String>,
     onAnswerSelected: (Int, Boolean) -> Unit,
-    //onAnswerSelected: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    //var checkedState by remember{mutableStateOf(false)}
-    //val (value, setValue) = remember { mutableStateOf(Boolean[]) }
-    //val options = possibleAnswer.optionsStringRes.associateBy { stringResource(id = it) }
+
     Column(modifier = modifier) {
         for (option in options) {
-            // } //{
-            // val selectedOption = answer?.answersStringRes?.contains(option.value)
-            // val selectedOption = options.indexOf(option)
-            // mutableStateOf(selectedOption ?: false)
-            // }
             var checkedState by remember { mutableStateOf(false) }
             val answerBorderColor = if (checkedState) {
                 MaterialTheme.colors.primary.copy(alpha = 0.5f)
@@ -153,6 +162,72 @@ private fun MultipleChoiceQuestion(
                         colors = CheckboxDefaults.colors(
                             checkedColor = MaterialTheme.colors.primary
                         ),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SingleChoiceQuestion(
+    options: List<String>,
+    onAnswerSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var checkedState by remember { mutableStateOf(-1) }
+
+    Column(modifier = modifier) {
+        options.forEach { text ->
+
+            val optionSelected = options.indexOf(text) == checkedState
+
+            val answerBorderColor = if (optionSelected) {
+                MaterialTheme.colors.primary.copy(alpha = 0.5f)
+            } else {
+                MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+            }
+            val answerBackgroundColor = if (optionSelected) {
+                MaterialTheme.colors.primary.copy(alpha = 0.12f)
+            } else {
+                MaterialTheme.colors.background
+            }
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = answerBorderColor
+                ),
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .selectable(
+                            selected = options.indexOf(text) == checkedState,
+                            onClick = {
+                                checkedState = options.indexOf(text)
+                                onAnswerSelected(options.indexOf(text))
+                            }
+                        )
+                        .background(answerBackgroundColor)
+                        .padding(vertical = 16.dp, horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = text
+                    )
+
+                    RadioButton(
+                        selected = options.indexOf(text) == checkedState,
+                        onClick = {
+                            checkedState = options.indexOf(text)
+                            onAnswerSelected(options.indexOf(text))
+                        },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = MaterialTheme.colors.primary
+                        )
                     )
                 }
             }

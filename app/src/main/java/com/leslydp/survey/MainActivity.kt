@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
                     var ans: Array<String>
                     var options = listOf<String>("option 1", "option 2", "option 3","option 4")
                     val preguntas= listOf<Question>(
-                        Question(id = 2, "hola",options)
+                        Question(id = 3, "hola",options)
                     )
 
                     JetsurveyScreen(preguntas) { answer ->
