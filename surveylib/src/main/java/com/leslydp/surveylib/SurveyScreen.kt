@@ -4,19 +4,28 @@ import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.leslydp.surveylib.model.Answer
 import com.leslydp.surveylib.model.Question
+
 
 @OptIn(
     ExperimentalMaterialApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class,
@@ -40,13 +49,10 @@ fun JetsurveyScreen(
                 Spacer(modifier = Modifier.height(32.dp))
                 QuestionTitle(question.questionName)
                 Spacer(modifier = Modifier.height(24.dp))
-                var respuesta: ArrayList<Byte> = ArrayList<Byte>()
-                question.options.forEach {
-                    respuesta.add(0)
-                }
+
                 Log.d("myTag2", question.questionName)
                 //QuestionTitle(question.questionName)
-                Log.d("tag", question.options.size.toString())
+                //Log.d("tag", question.options.size.toString())
                 when (question.id) {
                     1 -> {
                         val respuesta = mutableListOf<Byte>()
@@ -64,15 +70,24 @@ fun JetsurveyScreen(
                         SingleChoiceQuestion(question.options, onAnswerSelected = { id ->
                             if (respuesta.indexOf(1) > -1)
                                 respuesta[respuesta.indexOf(1)] = 0
-                            respuesta[id]=1
+                            respuesta[id] = 1
                             Log.d("myTag", respuesta.toString())
 
                         })
                     }
-                    3 -> 
+                    3 ->
                         SliderQuestion(question.options, onAnswerSelected = {
-                            Log.d("slider",it.toString())
+                            Log.d("slider", it.toString())
                         })
+                    4 -> {
+                        var textState = remember {
+                            mutableStateOf(TextFieldValue())
+                        }
+                        TextQuestion(onAnswerWritten = {
+                            Log.d("text", it)
+                        })
+                    }
+
 
                 }
             }
@@ -263,30 +278,47 @@ private fun SliderQuestion(
         )
     }
     Row {
-        for(option in options)
-        Text(
-            text = option,
-            style = MaterialTheme.typography.caption,
-            textAlign = TextAlign.Start,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1.8f)
-        )
-       /* Text(
-            text = stringResource(id = possibleAnswer.neutralText),
-            style = MaterialTheme.typography.caption,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1.8f)
-        )
-        Text(
-            text = stringResource(id = possibleAnswer.endText),
-            style = MaterialTheme.typography.caption,
-            textAlign = TextAlign.End,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1.8f)
-        )*/
+        for (option in options)
+            Text(
+                text = option,
+                style = MaterialTheme.typography.caption,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1.8f)
+            )
+
     }
+}
+
+@Composable
+fun TextQuestion(
+    //options: List<String>,
+    onAnswerWritten: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    //val (textState, setTextState) = remember { mutableStateOf("") }
+    val textState = remember { mutableStateOf(TextFieldValue()) }
+    TextField(modifier = Modifier
+        .fillMaxWidth()
+        .height(200.dp)
+        .clip(RoundedCornerShape(10.dp))
+        .border(2.dp, color = Color.Gray),
+        placeholder = { Text("Some description") },
+        value = textState.value,
+        colors = TextFieldDefaults.textFieldColors(
+            backgroundColor = White,
+            cursorColor = Color.Black,
+            disabledLabelColor = White,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        ),
+        //shape = RoundedCornerShape(100.dp),
+        onValueChange = {
+            textState.value = it
+            onAnswerWritten(textState.value.text)
+        })
+
+
+
 }
