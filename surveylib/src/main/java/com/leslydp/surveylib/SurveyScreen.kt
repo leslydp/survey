@@ -1,7 +1,6 @@
 package com.leslydp.surveylib
 
 import android.util.Log
-import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,20 +10,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.modifier.modifierLocalConsumer
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.leslydp.surveylib.model.Answer
-import com.leslydp.surveylib.model.Question
+import com.leslydp.surveylib.model.SQuestion
 
 
 @OptIn(
@@ -33,7 +29,7 @@ import com.leslydp.surveylib.model.Question
 )
 @Composable
 fun JetsurveyScreen(
-    list: List<Question>,
+    list: List<SQuestion>,
     onAnswer: (Answer) -> Unit
 ) {
     //var checkedState by remember{mutableStateOf(false)}
@@ -45,6 +41,7 @@ fun JetsurveyScreen(
                 .padding(),
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp)
         ) {
+            var ans = mutableListOf<String>()
             item {
                 Spacer(modifier = Modifier.height(32.dp))
                 QuestionTitle(question.questionName)
@@ -53,39 +50,48 @@ fun JetsurveyScreen(
                 Log.d("myTag2", question.questionName)
                 //QuestionTitle(question.questionName)
                 //Log.d("tag", question.options.size.toString())
-                when (question.id) {
-                    1 -> {
+                when (question) {
+                    is SQuestion.MultipleChoiceQuestion -> {
                         val respuesta = mutableListOf<Byte>()
 
-                        MultipleChoiceQuestion(question.options, onAnswerSelected = { idq, valor ->
+                        MultipleChoiceQuestionCMP(question.options, onAnswerSelected = { idq, valor ->
                             val compareTo = valor.compareTo(false)
                             respuesta[idq] = compareTo.toByte()
                             Log.d("myTag", respuesta.toString())
 
                         })
+                        ans.add(respuesta.toString())
+
                     }
-                    2 -> {
+                    is SQuestion.SingleChoiceQuestion -> {
                         val respuesta = mutableListOf<Byte>()
 
-                        SingleChoiceQuestion(question.options, onAnswerSelected = { id ->
+                        SingleChoiceQuestionCMP(question.options, onAnswerSelected = { id ->
                             if (respuesta.indexOf(1) > -1)
                                 respuesta[respuesta.indexOf(1)] = 0
                             respuesta[id] = 1
                             Log.d("myTag", respuesta.toString())
 
                         })
+                        ans.add(respuesta.toString())
+
                     }
-                    3 ->
-                        SliderQuestion(question.options, onAnswerSelected = {
+                    is SQuestion.SliderQuestion -> {
+                        var respuesta = 0f
+                        SliderQuestionCMP(question.options, onAnswerSelected = {
                             Log.d("slider", it.toString())
+                            respuesta = it
+
                         })
-                    4 -> {
-                        var textState = remember {
-                            mutableStateOf(TextFieldValue())
-                        }
-                        TextQuestion(onAnswerWritten = {
+                        ans.add("[!]${respuesta}")
+                    }
+
+                    is SQuestion.TextQuestion-> {
+                        var respuesta=""
+                        TextQuestionCMP(onAnswerWritten = {
                             Log.d("text", it)
                         })
+                        ans.add(respuesta)
                     }
 
 
@@ -121,7 +127,7 @@ private fun QuestionTitle(title: String) {
 }
 
 @Composable
-private fun MultipleChoiceQuestion(
+private fun MultipleChoiceQuestionCMP(
 
     options: List<String>,
     onAnswerSelected: (Int, Boolean) -> Unit,
@@ -185,7 +191,7 @@ private fun MultipleChoiceQuestion(
 }
 
 @Composable
-private fun SingleChoiceQuestion(
+private fun SingleChoiceQuestionCMP(
     options: List<String>,
     onAnswerSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -252,7 +258,7 @@ private fun SingleChoiceQuestion(
 
 
 @Composable
-private fun SliderQuestion(
+private fun SliderQuestionCMP(
     //possibleAnswer: PossibleAnswer.Slider,
     //answer: Answer.Slider?,
     options: List<String>,
@@ -292,7 +298,7 @@ private fun SliderQuestion(
 }
 
 @Composable
-fun TextQuestion(
+fun TextQuestionCMP(
     //options: List<String>,
     onAnswerWritten: (String) -> Unit,
     modifier: Modifier = Modifier
