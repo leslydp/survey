@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.leslydp.surveylib.model.Answer
 import com.leslydp.surveylib.model.SQuestion
+import com.ondev.imageblurkt_lib.ImageBlur
 
 
 @OptIn(
@@ -53,6 +54,22 @@ fun JetsurveyScreen(
                 when (question) {
                     is SQuestion.MultipleChoiceQuestion -> {
                         val respuesta = mutableListOf<Byte>()
+                        if(question.options.contains("[!]")){
+                            var blurhash= mutableListOf<String>()
+                            var url= mutableListOf<String>()
+                            var options= mutableListOf<String>()
+                            for (option in question.options){
+                                val optionSplit = option.split("[!]")
+                                blurhash.add(optionSplit[0])
+                                url.add(optionSplit[1])
+                                options.add(optionSplit[2])
+                            }
+                            MultipleChoiceIconQuestionCMP(options, url, blurhash,{idq, valor ->
+                                    val compareTo = valor.compareTo(false)
+                                     respuesta[idq] = compareTo.toByte()
+                                    Log.d("myTag", respuesta.toString())}
+                            )
+                        }
 
                         MultipleChoiceQuestionCMP(question.options, onAnswerSelected = { idq, valor ->
                             val compareTo = valor.compareTo(false)
@@ -171,6 +188,81 @@ private fun MultipleChoiceQuestionCMP(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+                    Text(text = option)
+
+                    Checkbox(
+                        checked = checkedState,
+                        onCheckedChange = { selected ->
+                            checkedState = selected
+                            onAnswerSelected(options.indexOf(option), selected)
+                            //onAnswerSelected(checkedState)
+                        },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = MaterialTheme.colors.primary
+                        ),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MultipleChoiceIconQuestionCMP(
+
+    options: List<String>,
+    url: List<String>,
+    blurhash: List<String>,
+    onAnswerSelected: (Int, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+
+    Column(modifier = modifier) {
+        for (option in options) {
+            var checkedState by remember { mutableStateOf(false) }
+            val answerBorderColor = if (checkedState) {
+                MaterialTheme.colors.primary.copy(alpha = 0.5f)
+            } else {
+                MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+            }
+            val answerBackgroundColor = if (checkedState) {
+                MaterialTheme.colors.primary.copy(alpha = 0.12f)
+            } else {
+                MaterialTheme.colors.background
+            }
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = answerBorderColor
+                ),
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(answerBackgroundColor)
+                        .clickable(
+                            onClick = {
+                                checkedState = !checkedState
+                                onAnswerSelected(options.indexOf(option), checkedState)
+                                //onAnswerSelected(checkedState)
+                            }
+                        )
+                        .padding(vertical = 16.dp, horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    ImageBlur(
+                        modifier = Modifier.width(56.dp)
+                            .height(56.dp)
+                            .clip(MaterialTheme.shapes.medium),
+                        blurhash = blurhash.indexOf(option).toString(),
+                        imageUrl = url.indexOf(option).toString(),
+                        notImageFoundRes = R.drawable.ic_no_image,
+                        resources = resources,
+                    )
                     Text(text = option)
 
                     Checkbox(
