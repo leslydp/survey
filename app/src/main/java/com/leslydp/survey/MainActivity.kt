@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.leslydp.survey.ui.theme.SurveyTheme
 import com.leslydp.surveylib.JetsurveyScreen
-import com.leslydp.surveylib.model.Question
+import com.leslydp.surveylib.model.SQuestion
 
 
 class MainActivity : ComponentActivity() {
@@ -27,8 +27,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     var ans: Array<String>
                     var options = listOf<String>("")
-                    val preguntas= listOf<Question>(
-                        Question(id = 4, "hola", options)
+                    val preguntas= listOf<SQuestion>(
+                        SQuestion.TextQuestion("hola")
                     )
 
                     JetsurveyScreen(preguntas) { answer ->

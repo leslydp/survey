@@ -305,19 +305,15 @@ fun TextQuestionCMP(
 ) {
     //val (textState, setTextState) = remember { mutableStateOf("") }
     val textState = remember { mutableStateOf(TextFieldValue()) }
-    TextField(modifier = Modifier
+    OutlinedTextField(modifier = Modifier
         .fillMaxWidth()
-        .height(200.dp)
-        .clip(RoundedCornerShape(10.dp))
-        .border(2.dp, color = Color.Gray),
+        .height(200.dp),
         placeholder = { Text("Some description") },
         value = textState.value,
         colors = TextFieldDefaults.textFieldColors(
             backgroundColor = White,
             cursorColor = Color.Black,
-            disabledLabelColor = White,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            disabledLabelColor = White
         ),
         //shape = RoundedCornerShape(100.dp),
         onValueChange = {
