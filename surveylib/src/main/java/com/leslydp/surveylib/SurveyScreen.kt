@@ -55,7 +55,11 @@ fun JetsurveyScreen(
                 when (question) {
                     is SQuestion.MultipleChoiceQuestion -> {
                         Log.d("tag",question.options[0])
+                        val cantMaxOptions=question.options.size
                         val respuesta = mutableListOf<Byte>()
+                        (1..cantMaxOptions).forEach {
+                            respuesta.add(0)
+                        }
                         if(question.options[0].contains("[!]")) {
                             val blurhash =
                                 mutableListOf<String>() //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
@@ -65,10 +69,11 @@ fun JetsurveyScreen(
                                 mutableListOf<String>() //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
                             for (option in question.options) {
                                 val optionSplit = option.split("[!]")
-                                blurhash.add(optionSplit[0])
-                                url.add(optionSplit[1])
+                                blurhash.add(optionSplit[1])
+                                url.add(optionSplit[0])
                                 options.add(optionSplit[2])
                                 Log.d("tag",option)
+                                Log.d("tag",url.toString())
                             }
                             MultipleChoiceIconQuestionCMP(options, url, blurhash, { idq, valor ->
                                 val compareTo = valor.compareTo(false)
@@ -90,15 +95,48 @@ fun JetsurveyScreen(
 
                     }
                     is SQuestion.SingleChoiceQuestion -> {
+                        val cantMaxOptions=question.options.size
                         val respuesta = mutableListOf<Byte>()
+                        (1..cantMaxOptions).forEach {
+                            respuesta.add(0)
+                        }
+                        if(question.options[0].contains("[!]")) {
+                            val blurhash =
+                                mutableListOf<String>() //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
+                            val url =
+                                mutableListOf<String>() //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
+                            val options =
+                                mutableListOf<String>() //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
+                            for (option in question.options) {
+                                val optionSplit = option.split("[!]")
+                                blurhash.add(optionSplit[1])
+                                url.add(optionSplit[0])
+                                options.add(optionSplit[2])
+                                Log.d("tag", option)
+                                Log.d("tag", url.toString())
+                            }
+                            SingleChoiceIconQuestionCMP(
+                                options = options,
+                                url = url,
+                                blurhash = blurhash,
+                                onAnswerSelected = {id ->
+                                    if (respuesta.indexOf(1) > -1)
+                                        respuesta[respuesta.indexOf(1)] = 0
+                                    respuesta[id] = 1
+                                    Log.d("myTag", respuesta.toString())
+                                }
+                            )
+                        }
+                        else{
 
-                        SingleChoiceQuestionCMP(question.options, onAnswerSelected = { id ->
-                            if (respuesta.indexOf(1) > -1)
-                                respuesta[respuesta.indexOf(1)] = 0
-                            respuesta[id] = 1
-                            Log.d("myTag", respuesta.toString())
+                            SingleChoiceQuestionCMP(question.options, onAnswerSelected = { id ->
+                                if (respuesta.indexOf(1) > -1)
+                                    respuesta[respuesta.indexOf(1)] = 0
+                                respuesta[id] = 1
+                                Log.d("myTag", respuesta.toString())
 
-                        })
+                            })
+                        }
                         ans.add(respuesta.toString())
 
                     }
@@ -268,14 +306,15 @@ private fun MultipleChoiceIconQuestionCMP(
                     //Esta es la forma en la que se puede solicitar el acceso a los recuresos que se ponen en la carpeta
                     //drawable
                     val resources = LocalContext.current.resources
-
+                    //Log.d("image",blurhash[blurhash.indexOf(option)])
+                   Log.d("image",url[options.indexOf(option)])
                     ImageBlur(
                         modifier = Modifier
                             .width(56.dp)
                             .height(56.dp)
                             .clip(MaterialTheme.shapes.medium),
-                        blurhash = blurhash.indexOf(option).toString(),
-                        imageUrl = url.indexOf(option).toString(),
+                        blurhash = blurhash[options.indexOf(option)],
+                        imageUrl = url[options.indexOf(option)],
                         notImageFoundRes = R.drawable.ic_no_image, // Esta es una imagen que se pone en la carpeta drawable q se mostrara en caso de que no exista la imagena ala hora de cargarla
                         resources = resources,
                     )
@@ -353,6 +392,86 @@ private fun SingleChoiceQuestionCMP(
                         onClick = {
                             checkedState = options.indexOf(text)
                             onAnswerSelected(options.indexOf(text))
+                        },
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = MaterialTheme.colors.primary
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun SingleChoiceIconQuestionCMP(
+    options: List<String>,
+    url: List<String>,
+    blurhash: List<String>,
+    onAnswerSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var checkedState by remember { mutableStateOf(-1) }
+
+    Column(modifier = modifier) {
+        options.forEach { option ->
+
+            val optionSelected = options.indexOf(option) == checkedState
+
+            val answerBorderColor = if (optionSelected) {
+                MaterialTheme.colors.primary.copy(alpha = 0.5f)
+            } else {
+                MaterialTheme.colors.onSurface.copy(alpha = 0.12f)
+            }
+            val answerBackgroundColor = if (optionSelected) {
+                MaterialTheme.colors.primary.copy(alpha = 0.12f)
+            } else {
+                MaterialTheme.colors.background
+            }
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = answerBorderColor
+                ),
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .selectable(
+                            selected = options.indexOf(option) == checkedState,
+                            onClick = {
+                                checkedState = options.indexOf(option)
+                                onAnswerSelected(options.indexOf(option))
+                            }
+                        )
+                        .background(answerBackgroundColor)
+                        .padding(vertical = 16.dp, horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    val resources = LocalContext.current.resources
+                    ImageBlur(
+                        modifier = Modifier
+                            .width(56.dp)
+                            .height(56.dp)
+                            .clip(MaterialTheme.shapes.medium),
+                        blurhash = blurhash[options.indexOf(option)],
+                        imageUrl = url[options.indexOf(option)],
+                        notImageFoundRes = R.drawable.ic_no_image, // Esta es una imagen que se pone en la carpeta drawable q se mostrara en caso de que no exista la imagena ala hora de cargarla
+                        resources = resources,
+                    )
+                    Text(
+                        text = option
+                    )
+
+                    RadioButton(
+                        selected = options.indexOf(option) == checkedState,
+                        onClick = {
+                            checkedState = options.indexOf(option)
+                            onAnswerSelected(options.indexOf(option))
                         },
                         colors = RadioButtonDefaults.colors(
                             selectedColor = MaterialTheme.colors.primary

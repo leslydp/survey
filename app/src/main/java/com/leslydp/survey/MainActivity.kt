@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     var ans: Array<String>
-                    var options = listOf<String>("option1", "option2", "option3", "option4")
+                    var options = listOf<String>("https://blurha.sh/assets/images/img1.jpg[!]LEHV6nWB2yk8pyo0adR*.7kCMdnj[!]option1","https://blurha.sh/assets/images/img1.jpg[!]LEHV6nWB2yk8pyo0adR*.7kCMdnj[!]option2","https://blurha.sh/assets/images/img1.jpg[!]LEHV6nWB2yk8pyo0adR*.7kCMdnj[!]option3")
                     val preguntas= listOf<SQuestion>(
                         SQuestion.SingleChoiceQuestion("hola", options )
                     )
