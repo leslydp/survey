@@ -34,7 +34,8 @@ fun JetsurveyScreen(
     onAnswer: (Answer) -> Unit
 ) {
     //var checkedState by remember{mutableStateOf(false)}
-
+    val ans =
+        mutableListOf<String>()  //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
     list.forEach { question ->
         LazyColumn(
             modifier = Modifier
@@ -42,8 +43,7 @@ fun JetsurveyScreen(
                 .padding(),
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp)
         ) {
-            val ans =
-                mutableListOf<String>()  //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
+
             item {
                 Spacer(modifier = Modifier.height(32.dp))
                 QuestionTitle(question.questionName)
@@ -163,6 +163,9 @@ fun JetsurveyScreen(
             }
         }
     }
+    val answ = Answer(ans)
+    onAnswer(answ)
+
 }
 
 @Composable
