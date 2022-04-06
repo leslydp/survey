@@ -3,12 +3,10 @@ package com.leslydp.surveylib
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,9 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import coil.annotation.ExperimentalCoilApi
 import com.leslydp.surveylib.model.Answer
 import com.leslydp.surveylib.model.SQuestion
 import com.ondev.imageblurkt_lib.ImageBlur
@@ -42,7 +42,8 @@ fun JetsurveyScreen(
                 .padding(),
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp)
         ) {
-            var ans = mutableListOf<String>()
+            val ans =
+                mutableListOf<String>()  //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
             item {
                 Spacer(modifier = Modifier.height(32.dp))
                 QuestionTitle(question.questionName)
@@ -54,20 +55,24 @@ fun JetsurveyScreen(
                 when (question) {
                     is SQuestion.MultipleChoiceQuestion -> {
                         val respuesta = mutableListOf<Byte>()
-                        if(question.options.contains("[!]")){
-                            var blurhash= mutableListOf<String>()
-                            var url= mutableListOf<String>()
-                            var options= mutableListOf<String>()
-                            for (option in question.options){
+                        if(question.options.contains("[!]")) {
+                            val blurhash =
+                                mutableListOf<String>() //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
+                            val url =
+                                mutableListOf<String>() //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
+                            val options =
+                                mutableListOf<String>() //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
+                            for (option in question.options) {
                                 val optionSplit = option.split("[!]")
                                 blurhash.add(optionSplit[0])
                                 url.add(optionSplit[1])
                                 options.add(optionSplit[2])
                             }
-                            MultipleChoiceIconQuestionCMP(options, url, blurhash,{idq, valor ->
-                                    val compareTo = valor.compareTo(false)
-                                     respuesta[idq] = compareTo.toByte()
-                                    Log.d("myTag", respuesta.toString())}
+                            MultipleChoiceIconQuestionCMP(options, url, blurhash, { idq, valor ->
+                                val compareTo = valor.compareTo(false)
+                                respuesta[idq] = compareTo.toByte()
+                                Log.d("myTag", respuesta.toString())
+                            }
                             )
                         }
 
@@ -207,6 +212,7 @@ private fun MultipleChoiceQuestionCMP(
     }
 }
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 private fun MultipleChoiceIconQuestionCMP(
 
@@ -254,13 +260,19 @@ private fun MultipleChoiceIconQuestionCMP(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+
+                    //Esta es la forma en la que se puede solicitar el acceso a los recuresos que se ponen en la carpeta
+                    //drawable
+                    val resources = LocalContext.current.resources
+
                     ImageBlur(
-                        modifier = Modifier.width(56.dp)
+                        modifier = Modifier
+                            .width(56.dp)
                             .height(56.dp)
                             .clip(MaterialTheme.shapes.medium),
                         blurhash = blurhash.indexOf(option).toString(),
                         imageUrl = url.indexOf(option).toString(),
-                        notImageFoundRes = R.drawable.ic_no_image,
+                        notImageFoundRes = R.drawable.ic_no_image, // Esta es una imagen que se pone en la carpeta drawable q se mostrara en caso de que no exista la imagena ala hora de cargarla
                         resources = resources,
                     )
                     Text(text = option)
