@@ -2,7 +2,7 @@ package com.leslydp.surveylib.model
 
 
 sealed class SQuestion(val questionName: String) {
-    class MultipleChoiceQuestion(val options: List<String>, questionName: String) : SQuestion(questionName)
+    class MultipleChoiceQuestion(questionName: String ,val options: List<String>) : SQuestion(questionName)
     class SingleChoiceQuestion(questionName: String, val options: List<String>) : SQuestion(questionName)
     class SliderQuestion(questionName: String, val options: List<String>): SQuestion(questionName)
     class TextQuestion(questionName: String): SQuestion(questionName)

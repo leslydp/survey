@@ -54,8 +54,9 @@ fun JetsurveyScreen(
                 //Log.d("tag", question.options.size.toString())
                 when (question) {
                     is SQuestion.MultipleChoiceQuestion -> {
+                        Log.d("tag",question.options[0])
                         val respuesta = mutableListOf<Byte>()
-                        if(question.options.contains("[!]")) {
+                        if(question.options[0].contains("[!]")) {
                             val blurhash =
                                 mutableListOf<String>() //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
                             val url =
@@ -67,22 +68,25 @@ fun JetsurveyScreen(
                                 blurhash.add(optionSplit[0])
                                 url.add(optionSplit[1])
                                 options.add(optionSplit[2])
+                                Log.d("tag",option)
                             }
                             MultipleChoiceIconQuestionCMP(options, url, blurhash, { idq, valor ->
                                 val compareTo = valor.compareTo(false)
                                 respuesta[idq] = compareTo.toByte()
-                                Log.d("myTag", respuesta.toString())
+                                Log.d("icon", respuesta.toString())
                             }
                             )
                         }
 
-                        MultipleChoiceQuestionCMP(question.options, onAnswerSelected = { idq, valor ->
-                            val compareTo = valor.compareTo(false)
-                            respuesta[idq] = compareTo.toByte()
-                            Log.d("myTag", respuesta.toString())
+                       else{
+                            MultipleChoiceQuestionCMP(question.options, onAnswerSelected = { idq, valor ->
+                                val compareTo = valor.compareTo(false)
+                                respuesta[idq] = compareTo.toByte()
+                                Log.d("noicon", respuesta.toString())
 
-                        })
-                        ans.add(respuesta.toString())
+                            })
+                            ans.add(respuesta.toString())
+                       }
 
                     }
                     is SQuestion.SingleChoiceQuestion -> {

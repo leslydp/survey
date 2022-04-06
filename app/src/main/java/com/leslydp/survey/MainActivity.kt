@@ -26,9 +26,9 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     var ans: Array<String>
-                    var options = listOf<String>("")
+                    var options = listOf<String>("option1", "option2", "option3", "option4")
                     val preguntas= listOf<SQuestion>(
-                        SQuestion.TextQuestion("hola")
+                        SQuestion.SingleChoiceQuestion("hola", options )
                     )
 
                     JetsurveyScreen(preguntas) { answer ->
