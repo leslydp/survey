@@ -8,11 +8,14 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.leslydp.survey.ui.theme.SurveyTheme
 import com.leslydp.surveylib.JetsurveyScreen
+import com.leslydp.surveylib.SurveyQuestionsScreen
 import com.leslydp.surveylib.model.SQuestion
+import com.leslydp.surveylib.model.SurveyState
 
 
 class MainActivity : ComponentActivity() {
@@ -30,8 +33,8 @@ class MainActivity : ComponentActivity() {
                     val preguntas= listOf<SQuestion>(
                         SQuestion.SingleChoiceQuestion("hola", options )
                     )
-
-                    JetsurveyScreen(preguntas) { answer ->
+                    val state: SurveyState.Questions by remenber{mutableStateOf()}
+                    SurveyQuestionsScreen(preguntas,{},state) { answer ->
                         ans = answer.ans
                     }
                 }

@@ -39,13 +39,13 @@ import com.ondev.imageblurkt_lib.ImageBlur
 )
 @Composable
 fun JetsurveyScreen(
-    list: List<SQuestion>,
-    onAnswer: (Answer) -> Unit
+    question: SQuestion,
+    onAnswer: (String) -> Unit
 ) {
     //var checkedState by remember{mutableStateOf(false)}
     val ans =
         mutableListOf<String>()  //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
-    list.forEach { question ->
+    //list.forEach { question ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -171,9 +171,9 @@ fun JetsurveyScreen(
                 }
             }
         }
-    }
-    val answ = Answer(ans)
-    onAnswer(answ)
+   // }
+    //val answ = Answer(ans)
+    onAnswer(ans.toString())
 
 }
 
@@ -183,17 +183,20 @@ fun SurveyQuestionsScreen(
     shouldAskPermissions: Boolean,
     onDoNotAskForPermissions: () -> Unit,
     onAction: (Int, SurveyActionType) -> Unit,*/
+    questionsList: List<SQuestion>,
     onDonePressed: () -> Unit,
     questions: SurveyState.Questions,
     onBackPressed: () -> Unit,
     //openSettings: () -> Unit
-    questionsList: List<SQuestion>,
+
     onAnswer: (Answer) -> Unit
 ) {
     val questionindex = remember{ mutableStateOf(questionsList.indexOf(questionsList[0]))}
     val questionState = remember(questionindex) {
         questions.questionsState[questions.currentQuestionIndex]
     }
+    val ans =
+        mutableListOf<String>()
 
     Surface(modifier = Modifier
         .fillMaxWidth()
@@ -208,7 +211,7 @@ fun SurveyQuestionsScreen(
                 )
             },
             content = { innerPadding ->
-                JetsurveyScreen(list = questionsList, onAnswer = {})
+                JetsurveyScreen(questionsList[questions.currentQuestionIndex], onAnswer = {ans.add(it)})
 
             },
             bottomBar = {
@@ -238,7 +241,7 @@ private fun TopAppBarTitle(
             append("${questionIndex + 1}")
         }
         withStyle(style = totalStyle) {
-            append(stringResource(totalQuestionsCount))
+            append(totalQuestionsCount.toString())
         }
     }
     Text(
