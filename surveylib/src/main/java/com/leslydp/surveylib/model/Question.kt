@@ -15,7 +15,7 @@ sealed class SQuestion(val questionName: String) {
 }
 
 
-@Stable
+/*@Stable
 class QuestionState(
     val questionIndex: Int,
     val totalQuestionsCount: Int,
@@ -32,7 +32,7 @@ sealed class SurveyState {
     ) : SurveyState() {
         var currentQuestionIndex by mutableStateOf(0)
     }
-}
+}*/
 
 
 /*enum class QUESTION{

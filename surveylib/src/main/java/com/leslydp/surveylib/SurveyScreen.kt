@@ -27,9 +27,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import com.leslydp.surveylib.model.Answer
-import com.leslydp.surveylib.model.QuestionState
 import com.leslydp.surveylib.model.SQuestion
-import com.leslydp.surveylib.model.SurveyState
 import com.ondev.imageblurkt_lib.ImageBlur
 
 
@@ -99,8 +97,10 @@ fun JetsurveyScreen(
                                 Log.d("noicon", respuesta.toString())
 
                             })
-                            ans.add(respuesta.toString())
+
                        }
+                        ans.add(respuesta.toString())
+                        onAnswer(ans.toString())
 
                     }
                     is SQuestion.SingleChoiceQuestion -> {
@@ -147,6 +147,7 @@ fun JetsurveyScreen(
                             })
                         }
                         ans.add(respuesta.toString())
+                        onAnswer(ans.toString())
 
                     }
                     is SQuestion.SliderQuestion -> {
@@ -157,6 +158,7 @@ fun JetsurveyScreen(
 
                         })
                         ans.add("[!]${respuesta}")
+                        onAnswer(ans.toString())
                     }
 
                     is SQuestion.TextQuestion-> {
@@ -165,6 +167,7 @@ fun JetsurveyScreen(
                             Log.d("text", it)
                         })
                         ans.add(respuesta)
+                        onAnswer(ans.toString())
                     }
 
 
@@ -172,29 +175,19 @@ fun JetsurveyScreen(
             }
         }
    // }
-    //val answ = Answer(ans)
-    onAnswer(ans.toString())
+
 
 }
 
 @Composable
 fun SurveyQuestionsScreen(
-    /*questions: SurveyState.Questions,
-    shouldAskPermissions: Boolean,
-    onDoNotAskForPermissions: () -> Unit,
-    onAction: (Int, SurveyActionType) -> Unit,*/
     questionsList: List<SQuestion>,
-    onDonePressed: () -> Unit,
-    questions: SurveyState.Questions,
     onBackPressed: () -> Unit,
-    //openSettings: () -> Unit
-
+    onDonePressed: () -> Unit,
     onAnswer: (Answer) -> Unit
 ) {
-    val questionindex = remember{ mutableStateOf(questionsList.indexOf(questionsList[0]))}
-    val questionState = remember(questionindex) {
-        questions.questionsState[questions.currentQuestionIndex]
-    }
+    val questionindex = remember{ mutableStateOf(0)}
+
     val ans =
         mutableListOf<String>()
 
@@ -205,25 +198,27 @@ fun SurveyQuestionsScreen(
         Scaffold(
             topBar = {
                 SurveyTopAppBar(
-                    questionIndex = questionState.questionIndex,
-                    totalQuestionsCount = questionState.totalQuestionsCount,
+                    questionIndex = questionindex.value,
+                    totalQuestionsCount = questionsList.size,
                     onBackPressed = onBackPressed
                 )
             },
             content = { innerPadding ->
-                JetsurveyScreen(questionsList[questions.currentQuestionIndex], onAnswer = {ans.add(it)})
-
+                JetsurveyScreen(questionsList[questionindex.value], onAnswer = {ans.add(it)})
             },
             bottomBar = {
                 SurveyBottomBar(
-                    questionState = questionState,
-                    onPreviousPressed = { questions.currentQuestionIndex-- },
-                    onNextPressed = { questions.currentQuestionIndex++ },
+                    questionIndex = questionindex.value,
+                    questionSize = questionsList.size,
+                    onPreviousPressed = { questionindex.value -= 1 },
+                    onNextPressed = { questionindex.value += 1 },
                     onDonePressed = onDonePressed
                 )
             }
         )
     }
+    val answer = Answer(ans)
+    onAnswer(answer)
 }
 
 @Composable
@@ -241,7 +236,7 @@ private fun TopAppBarTitle(
             append("${questionIndex + 1}")
         }
         withStyle(style = totalStyle) {
-            append(totalQuestionsCount.toString())
+            append("of $totalQuestionsCount")
         }
     }
     Text(
@@ -299,7 +294,9 @@ private fun SurveyTopAppBar(
 
 @Composable
 private fun SurveyBottomBar(
-    questionState: QuestionState,
+    //questionState: QuestionState,
+    questionSize: Int,
+    questionIndex: Int,
     onPreviousPressed: () -> Unit,
     onNextPressed: () -> Unit,
     onDonePressed: () -> Unit
@@ -314,7 +311,7 @@ private fun SurveyBottomBar(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 20.dp)
         ) {
-            if (questionState.showPrevious) {
+            if (questionIndex != 0) {
                 OutlinedButton(
                     modifier = Modifier
                         .weight(1f)
@@ -325,13 +322,13 @@ private fun SurveyBottomBar(
                 }
                 Spacer(modifier = Modifier.width(16.dp))
             }
-            if (questionState.showDone) {
+            if (questionIndex == questionSize-1) {
                 Button(
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
                     onClick = onDonePressed,
-                    enabled = questionState.enableNext
+                    enabled = true
                 ) {
                     Text(text = "DONE")
                 }
@@ -341,7 +338,7 @@ private fun SurveyBottomBar(
                         .weight(1f)
                         .height(48.dp),
                     onClick = onNextPressed,
-                    enabled = questionState.enableNext
+                    enabled = true
                 ) {
                     Text(text = "NEXT")
                 }
@@ -349,6 +346,7 @@ private fun SurveyBottomBar(
         }
     }
 }
+
 
 @Composable
 private fun QuestionTitle(title: String) {
@@ -528,7 +526,7 @@ private fun SingleChoiceQuestionCMP(
     onAnswerSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var checkedState by remember { mutableStateOf(-1) }
+    var checkedState by remember { mutableStateOf(0) }
 
     Column(modifier = modifier) {
         options.forEach { text ->
