@@ -1,6 +1,7 @@
 package com.leslydp.surveylib
 
 import android.util.Log
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,6 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,8 +18,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import com.leslydp.surveylib.model.Answer
@@ -30,13 +37,13 @@ import com.ondev.imageblurkt_lib.ImageBlur
 )
 @Composable
 fun JetsurveyScreen(
-    list: List<SQuestion>,
-    onAnswer: (Answer) -> Unit
+    question: SQuestion,
+    onAnswer: (String) -> Unit
 ) {
     //var checkedState by remember{mutableStateOf(false)}
     val ans =
         mutableListOf<String>()  //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
-    list.forEach { question ->
+    //list.forEach { question ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -90,8 +97,10 @@ fun JetsurveyScreen(
                                 Log.d("noicon", respuesta.toString())
 
                             })
-                            ans.add(respuesta.toString())
+
                        }
+                        ans.add(respuesta.toString())
+                        onAnswer(ans.toString())
 
                     }
                     is SQuestion.SingleChoiceQuestion -> {
@@ -138,6 +147,7 @@ fun JetsurveyScreen(
                             })
                         }
                         ans.add(respuesta.toString())
+                        onAnswer(ans.toString())
 
                     }
                     is SQuestion.SliderQuestion -> {
@@ -148,6 +158,7 @@ fun JetsurveyScreen(
 
                         })
                         ans.add("[!]${respuesta}")
+                        onAnswer(ans.toString())
                     }
 
                     is SQuestion.TextQuestion-> {
@@ -156,17 +167,186 @@ fun JetsurveyScreen(
                             Log.d("text", it)
                         })
                         ans.add(respuesta)
+                        onAnswer(ans.toString())
                     }
 
 
                 }
             }
         }
-    }
-    val answ = Answer(ans)
-    onAnswer(answ)
+   // }
+
 
 }
+
+@Composable
+fun SurveyQuestionsScreen(
+    questionsList: List<SQuestion>,
+    onBackPressed: () -> Unit,
+    onDonePressed: () -> Unit,
+    onAnswer: (Answer) -> Unit
+) {
+    val questionindex = remember{ mutableStateOf(0)}
+
+    val ans =
+        mutableListOf<String>()
+
+    Surface(modifier = Modifier
+        .fillMaxWidth()
+        .wrapContentWidth(align = Alignment.CenterHorizontally)
+        .widthIn(max = 840.dp)) {
+        Scaffold(
+            topBar = {
+                SurveyTopAppBar(
+                    questionIndex = questionindex.value,
+                    totalQuestionsCount = questionsList.size,
+                    onBackPressed = onBackPressed
+                )
+            },
+            content = { innerPadding ->
+                JetsurveyScreen(questionsList[questionindex.value], onAnswer = {ans.add(it)})
+            },
+            bottomBar = {
+                SurveyBottomBar(
+                    questionIndex = questionindex.value,
+                    questionSize = questionsList.size,
+                    onPreviousPressed = { questionindex.value -= 1 },
+                    onNextPressed = { questionindex.value += 1 },
+                    onDonePressed = onDonePressed
+                )
+            }
+        )
+    }
+    val answer = Answer(ans)
+    onAnswer(answer)
+}
+
+@Composable
+private fun TopAppBarTitle(
+    questionIndex: Int,
+    totalQuestionsCount: Int,
+    modifier: Modifier = Modifier
+) {
+    val indexStyle = MaterialTheme.typography.caption.toSpanStyle().copy(
+        fontWeight = FontWeight.Bold
+    )
+    val totalStyle = MaterialTheme.typography.caption.toSpanStyle()
+    val text = buildAnnotatedString {
+        withStyle(style = indexStyle) {
+            append("${questionIndex + 1}")
+        }
+        withStyle(style = totalStyle) {
+            append("of $totalQuestionsCount")
+        }
+    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.caption,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun SurveyTopAppBar(
+    questionIndex: Int,
+    totalQuestionsCount: Int,
+    onBackPressed: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            TopAppBarTitle(
+                questionIndex = questionIndex,
+                totalQuestionsCount = totalQuestionsCount,
+                modifier = Modifier
+                    .padding(vertical = 20.dp)
+                    .align(Alignment.Center)
+            )
+
+            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                IconButton(
+                    onClick = onBackPressed,
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp, vertical = 20.dp)
+                        .fillMaxWidth()
+                ) {
+                    //val resources = LocalContext.current.resources
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = "close",
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                    )
+                }
+            }
+        }
+        val animatedProgress by animateFloatAsState(
+            targetValue = (questionIndex + 1) / totalQuestionsCount.toFloat(),
+            animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec
+        )
+        LinearProgressIndicator(
+            progress = animatedProgress,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            backgroundColor =  Color.Black.copy(alpha = 0.12f)
+        )
+    }
+}
+
+@Composable
+private fun SurveyBottomBar(
+    //questionState: QuestionState,
+    questionSize: Int,
+    questionIndex: Int,
+    onPreviousPressed: () -> Unit,
+    onNextPressed: () -> Unit,
+    onDonePressed: () -> Unit
+) {
+    Surface(
+        elevation = 7.dp,
+        modifier = Modifier.fillMaxWidth() // .border(1.dp, MaterialTheme.colors.primary)
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 20.dp)
+        ) {
+            if (questionIndex != 0) {
+                OutlinedButton(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    onClick = onPreviousPressed
+                ) {
+                    Text(text = "PREVIOUS")
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+            if (questionIndex == questionSize-1) {
+                Button(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    onClick = onDonePressed,
+                    enabled = true
+                ) {
+                    Text(text = "DONE")
+                }
+            } else {
+                Button(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    onClick = onNextPressed,
+                    enabled = true
+                ) {
+                    Text(text = "NEXT")
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 private fun QuestionTitle(title: String) {
@@ -346,7 +526,7 @@ private fun SingleChoiceQuestionCMP(
     onAnswerSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var checkedState by remember { mutableStateOf(-1) }
+    var checkedState by remember { mutableStateOf(0) }
 
     Column(modifier = modifier) {
         options.forEach { text ->
