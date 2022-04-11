@@ -294,7 +294,6 @@ private fun SurveyTopAppBar(
 
 @Composable
 private fun SurveyBottomBar(
-    //questionState: QuestionState,
     questionSize: Int,
     questionIndex: Int,
     onPreviousPressed: () -> Unit,
