@@ -38,6 +38,7 @@ import com.ondev.imageblurkt_lib.ImageBlur
 @Composable
 fun JetsurveyScreen(
     question: SQuestion,
+    questionState: State<Boolean>,
     onAnswer: (String) -> Unit
 ) {
     //var checkedState by remember{mutableStateOf(false)}
@@ -82,7 +83,7 @@ fun JetsurveyScreen(
                                 Log.d("tag",option)
                                 Log.d("tag",url.toString())
                             }
-                            MultipleChoiceIconQuestionCMP(options, url, blurhash, { idq, valor ->
+                            MultipleChoiceIconQuestionCMP(options,questionState, url, blurhash, { idq, valor ->
                                 val compareTo = valor.compareTo(false)
                                 respuesta[idq] = compareTo.toByte()
                                 Log.d("icon", respuesta.toString())
@@ -91,7 +92,7 @@ fun JetsurveyScreen(
                         }
 
                        else{
-                            MultipleChoiceQuestionCMP(question.options, onAnswerSelected = { idq, valor ->
+                            MultipleChoiceQuestionCMP(question.options, questionState,onAnswerSelected = { idq, valor ->
                                 val compareTo = valor.compareTo(false)
                                 respuesta[idq] = compareTo.toByte()
                                 Log.d("noicon", respuesta.toString())
@@ -126,6 +127,7 @@ fun JetsurveyScreen(
                             }
                             SingleChoiceIconQuestionCMP(
                                 options = options,
+                                questionState = questionState,
                                 url = url,
                                 blurhash = blurhash,
                                 onAnswerSelected = {id ->
@@ -138,7 +140,7 @@ fun JetsurveyScreen(
                         }
                         else{
 
-                            SingleChoiceQuestionCMP(question.options, onAnswerSelected = { id ->
+                            SingleChoiceQuestionCMP(question.options,questionState, onAnswerSelected = { id ->
                                 if (respuesta.indexOf(1) > -1)
                                     respuesta[respuesta.indexOf(1)] = 0
                                 respuesta[id] = 1
@@ -152,7 +154,7 @@ fun JetsurveyScreen(
                     }
                     is SQuestion.SliderQuestion -> {
                         var respuesta = 0f
-                        SliderQuestionCMP(question.options, onAnswerSelected = {
+                        SliderQuestionCMP(question.options,questionState, onAnswerSelected = {
                             Log.d("slider", it.toString())
                             respuesta = it
 
@@ -161,9 +163,9 @@ fun JetsurveyScreen(
                         onAnswer(ans.toString())
                     }
 
-                    is SQuestion.TextQuestion-> {
+                    is SQuestion.TextQuestion->{
                         var respuesta=""
-                        TextQuestionCMP(onAnswerWritten = {
+                        TextQuestionCMP(questionState,onAnswerWritten = {
                             Log.d("text", it)
                         })
                         ans.add(respuesta)
@@ -190,6 +192,7 @@ fun SurveyQuestionsScreen(
 
     val ans =
         mutableListOf<String>()
+    var questionState = remember{ mutableStateOf(false)}
 
     Surface(modifier = Modifier
         .fillMaxWidth()
@@ -204,7 +207,7 @@ fun SurveyQuestionsScreen(
                 )
             },
             content = { innerPadding ->
-                JetsurveyScreen(questionsList[questionindex.value], onAnswer = {ans.add(it)})
+                JetsurveyScreen(questionsList[questionindex.value],questionState, onAnswer = {ans.add(it)})
             },
             bottomBar = {
                 SurveyBottomBar(
@@ -376,6 +379,7 @@ private fun QuestionTitle(title: String) {
 private fun MultipleChoiceQuestionCMP(
 
     options: List<String>,
+    questionState: State<Boolean>,
     onAnswerSelected: (Int, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -441,6 +445,7 @@ private fun MultipleChoiceQuestionCMP(
 private fun MultipleChoiceIconQuestionCMP(
 
     options: List<String>,
+    questionState: State<Boolean>,
     url: List<String>,
     blurhash: List<String>,
     onAnswerSelected: (Int, Boolean) -> Unit,
@@ -522,6 +527,7 @@ private fun MultipleChoiceIconQuestionCMP(
 @Composable
 private fun SingleChoiceQuestionCMP(
     options: List<String>,
+    questionState: State<Boolean>,
     onAnswerSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -589,6 +595,7 @@ private fun SingleChoiceQuestionCMP(
 @Composable
 private fun SingleChoiceIconQuestionCMP(
     options: List<String>,
+    questionState: State<Boolean>,
     url: List<String>,
     blurhash: List<String>,
     onAnswerSelected: (Int) -> Unit,
@@ -668,9 +675,8 @@ private fun SingleChoiceIconQuestionCMP(
 
 @Composable
 private fun SliderQuestionCMP(
-    //possibleAnswer: PossibleAnswer.Slider,
-    //answer: Answer.Slider?,
     options: List<String>,
+    questionState: State<Boolean>,
     onAnswerSelected: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -708,7 +714,7 @@ private fun SliderQuestionCMP(
 
 @Composable
 fun TextQuestionCMP(
-    //options: List<String>,
+    questionState: State<Boolean>,
     onAnswerWritten: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -724,9 +730,11 @@ fun TextQuestionCMP(
             cursorColor = Color.Black,
             disabledLabelColor = White
         ),
-        //shape = RoundedCornerShape(100.dp),
         onValueChange = {
             textState.value = it
+            if(it.toString() != ""){
+                questionState.value = true
+            }
             onAnswerWritten(textState.value.text)
         })
 
