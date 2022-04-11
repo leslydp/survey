@@ -18,7 +18,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -38,7 +37,7 @@ import com.ondev.imageblurkt_lib.ImageBlur
 @Composable
 fun JetsurveyScreen(
     question: SQuestion,
-    questionState: State<Boolean>,
+    questionState: MutableState<Boolean>,
     onAnswer: (String) -> Unit
 ) {
     //var checkedState by remember{mutableStateOf(false)}
@@ -102,6 +101,7 @@ fun JetsurveyScreen(
                        }
                         ans.add(respuesta.toString())
                         onAnswer(ans.toString())
+                        Log.d("respuesta2",ans.toString())
 
                     }
                     is SQuestion.SingleChoiceQuestion -> {
@@ -165,9 +165,9 @@ fun JetsurveyScreen(
 
                     is SQuestion.TextQuestion->{
                         var respuesta=""
-                        TextQuestionCMP(questionState,onAnswerWritten = {
+                        TextQuestionCMP(onAnswerWritten = {
                             Log.d("text", it)
-                        })
+                        },modifier = Modifier, questionState)
                         ans.add(respuesta)
                         onAnswer(ans.toString())
                     }
@@ -215,7 +215,8 @@ fun SurveyQuestionsScreen(
                     questionSize = questionsList.size,
                     onPreviousPressed = { questionindex.value -= 1 },
                     onNextPressed = { questionindex.value += 1 },
-                    onDonePressed = onDonePressed
+                    onDonePressed = onDonePressed,
+                    questionState = questionState
                 )
             }
         )
@@ -301,7 +302,8 @@ private fun SurveyBottomBar(
     questionIndex: Int,
     onPreviousPressed: () -> Unit,
     onNextPressed: () -> Unit,
-    onDonePressed: () -> Unit
+    onDonePressed: () -> Unit,
+    questionState: MutableState<Boolean>
 ) {
     Surface(
         elevation = 7.dp,
@@ -330,9 +332,10 @@ private fun SurveyBottomBar(
                         .weight(1f)
                         .height(48.dp),
                     onClick = onDonePressed,
-                    enabled = true
+                    enabled = questionState.value
                 ) {
                     Text(text = "DONE")
+                    Log.d("estadoBotton",questionState.value.toString())
                 }
             } else {
                 Button(
@@ -340,7 +343,7 @@ private fun SurveyBottomBar(
                         .weight(1f)
                         .height(48.dp),
                     onClick = onNextPressed,
-                    enabled = true
+                    enabled = questionState.value
                 ) {
                     Text(text = "NEXT")
                 }
@@ -379,11 +382,11 @@ private fun QuestionTitle(title: String) {
 private fun MultipleChoiceQuestionCMP(
 
     options: List<String>,
-    questionState: State<Boolean>,
+    questionState: MutableState<Boolean>,
     onAnswerSelected: (Int, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-
+    questionState.value = true
     Column(modifier = modifier) {
         for (option in options) {
             var checkedState by remember { mutableStateOf(false) }
@@ -428,7 +431,7 @@ private fun MultipleChoiceQuestionCMP(
                         onCheckedChange = { selected ->
                             checkedState = selected
                             onAnswerSelected(options.indexOf(option), selected)
-                            //onAnswerSelected(checkedState)
+                            //questionState.value = true
                         },
                         colors = CheckboxDefaults.colors(
                             checkedColor = MaterialTheme.colors.primary
@@ -445,13 +448,13 @@ private fun MultipleChoiceQuestionCMP(
 private fun MultipleChoiceIconQuestionCMP(
 
     options: List<String>,
-    questionState: State<Boolean>,
+    questionState: MutableState<Boolean>,
     url: List<String>,
     blurhash: List<String>,
     onAnswerSelected: (Int, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-
+    questionState.value = true
     Column(modifier = modifier) {
         for (option in options) {
             var checkedState by remember { mutableStateOf(false) }
@@ -482,7 +485,7 @@ private fun MultipleChoiceIconQuestionCMP(
                             onClick = {
                                 checkedState = !checkedState
                                 onAnswerSelected(options.indexOf(option), checkedState)
-                                //onAnswerSelected(checkedState)
+                                //questionState.value = true
                             }
                         )
                         .padding(vertical = 16.dp, horizontal = 16.dp),
@@ -527,11 +530,12 @@ private fun MultipleChoiceIconQuestionCMP(
 @Composable
 private fun SingleChoiceQuestionCMP(
     options: List<String>,
-    questionState: State<Boolean>,
+    questionState: MutableState<Boolean>,
     onAnswerSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var checkedState by remember { mutableStateOf(0) }
+    questionState.value = true
 
     Column(modifier = modifier) {
         options.forEach { text ->
@@ -595,14 +599,14 @@ private fun SingleChoiceQuestionCMP(
 @Composable
 private fun SingleChoiceIconQuestionCMP(
     options: List<String>,
-    questionState: State<Boolean>,
+    questionState: MutableState<Boolean>,
     url: List<String>,
     blurhash: List<String>,
     onAnswerSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var checkedState by remember { mutableStateOf(-1) }
-
+    questionState.value = true
     Column(modifier = modifier) {
         options.forEach { option ->
 
@@ -676,13 +680,14 @@ private fun SingleChoiceIconQuestionCMP(
 @Composable
 private fun SliderQuestionCMP(
     options: List<String>,
-    questionState: State<Boolean>,
+    questionState: MutableState<Boolean>,
     onAnswerSelected: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var sliderPosition by remember {
         mutableStateOf(0f)
     }
+    questionState.value = true
     Row(modifier = modifier) {
 
         Slider(
@@ -714,12 +719,14 @@ private fun SliderQuestionCMP(
 
 @Composable
 fun TextQuestionCMP(
-    questionState: State<Boolean>,
     onAnswerWritten: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    questionState: MutableState<Boolean>
 ) {
-    //val (textState, setTextState) = remember { mutableStateOf("") }
+    //questionState.value = false
     val textState = remember { mutableStateOf(TextFieldValue()) }
+    val qState = remember{ mutableStateOf(false)}
+    questionState.value = qState.value
     OutlinedTextField(modifier = Modifier
         .fillMaxWidth()
         .height(200.dp),
@@ -732,9 +739,8 @@ fun TextQuestionCMP(
         ),
         onValueChange = {
             textState.value = it
-            if(it.toString() != ""){
-                questionState.value = true
-            }
+            qState.value = textState.value.text != ""
+            Log.d("estado",questionState.value.toString())
             onAnswerWritten(textState.value.text)
         })
 
