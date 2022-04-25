@@ -13,7 +13,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.leslydp.survey.ui.theme.SurveyTheme
-import com.leslydp.surveylib.JetsurveyScreen
 import com.leslydp.surveylib.SurveyQuestionsScreen
 import com.leslydp.surveylib.model.SQuestion
 
