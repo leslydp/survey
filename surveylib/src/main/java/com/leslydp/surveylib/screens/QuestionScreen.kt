@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.leslydp.surveylib.components.QuestionTitle
 import com.leslydp.surveylib.model.Answer
+import com.leslydp.surveylib.model.Form
 import com.leslydp.surveylib.model.SQuestion
 
 @OptIn(
@@ -17,7 +18,7 @@ import com.leslydp.surveylib.model.SQuestion
 )
 @Composable
 fun JetSurveyScreen(
-    question: SQuestion,
+    question: Form,
     questionState: MutableState<Boolean>,
     onAnswer: (String) -> Unit
 ) {
@@ -34,14 +35,14 @@ fun JetSurveyScreen(
 
         item {
             Spacer(modifier = Modifier.height(32.dp))
-            QuestionTitle(question.questionName)
+            QuestionTitle(question.question)
             Spacer(modifier = Modifier.height(24.dp))
 
-            Log.d("myTag2", question.questionName)
+            Log.d("myTag2", question.question)
             //QuestionTitle(question.questionName)
             //Log.d("tag", question.options.size.toString())
-            when (question) {
-                is SQuestion.MultipleChoiceQuestion -> {
+            when (question.type) {
+                 1 -> {
                     Log.d("tag",question.options[0])
                     val cantMaxOptions=question.options.size
                     val respuesta = mutableListOf<Byte>()
@@ -88,7 +89,7 @@ fun JetSurveyScreen(
                     Log.d("respuesta2",ans.toString())
 
                 }
-                is SQuestion.SingleChoiceQuestion -> {
+                2 -> {
                     val cantMaxOptions=question.options.size
                     val respuesta = mutableListOf<Byte>()
                     (1..cantMaxOptions).forEach {
@@ -138,7 +139,7 @@ fun JetSurveyScreen(
 
 
                 }
-                is SQuestion.SliderQuestion -> {
+                3 -> {
                     var respuesta = 0f
                     SliderQuestionCMP(question.options,questionState, onAnswerSelected = {
                         Log.d("slider", it.toString())
@@ -149,7 +150,7 @@ fun JetSurveyScreen(
 
                 }
 
-                is SQuestion.TextQuestion->{
+                4 ->{
                     var respuesta=""
                     TextQuestionCMP(onAnswerWritten = {
                         Log.d("text", it)

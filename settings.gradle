@@ -4,6 +4,10 @@ pluginManagement {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        maven {
+            url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
+        }
+
     }
 }
 dependencyResolutionManagement {
@@ -12,8 +16,12 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        maven {
+            url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
+        }
     }
 }
 rootProject.name = "survey"
 include ':app'
 include ':surveylib'
+include ':surveyactivity'

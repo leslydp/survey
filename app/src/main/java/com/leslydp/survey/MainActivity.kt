@@ -13,8 +13,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.leslydp.survey.ui.theme.SurveyTheme
-import com.leslydp.surveylib.SurveyQuestionsScreen
-import com.leslydp.surveylib.model.SQuestion
 
 
 class MainActivity : ComponentActivity() {
@@ -27,21 +25,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    var ans: List<String>
-                    var option2 = listOf<String>("https://blurha.sh/assets/images/img1.jpg[!]LEHV6nWB2yk8pyo0adR*.7kCMdnj[!]option1","https://blurha.sh/assets/images/img1.jpg[!]LEHV6nWB2yk8pyo0adR*.7kCMdnj[!]option2","https://blurha.sh/assets/images/img1.jpg[!]LEHV6nWB2yk8pyo0adR*.7kCMdnj[!]option3")
-                    var options = listOf<String>("option1","option2","option3")
-                    val preguntas= listOf<SQuestion>(
-                        SQuestion.TextQuestion("Hola4"),
-                        SQuestion.SingleChoiceQuestion("hola", options ),
-                        SQuestion.MultipleChoiceQuestion("Hola2",option2),
-                        SQuestion.SliderQuestion("Hola3",options)
 
-                    )
-
-                    SurveyQuestionsScreen(preguntas,{finish()},{}) { answer ->
-                        ans = answer.ans
-                        Log.d("repuesta",ans.toString())
-                    }
                 }
             }
         }
