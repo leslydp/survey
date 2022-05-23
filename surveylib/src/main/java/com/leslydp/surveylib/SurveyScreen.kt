@@ -28,11 +28,16 @@ fun SurveyQuestionsScreen(
     val sendInfo = remember {
         mutableStateOf(false)
     }
-    val ans =
-        mutableListOf<String>()
+    var ans = StringBuilder()
     val questionState = remember{ mutableStateOf(false)}
     val questions = surveyViewModel.surveyQuestion.collectAsState()
     if(questions.value!= null) {
+        questions.value?.form!!.forEachIndexed { index, form ->
+            if(index < questions.value?.form!!.size -1)
+                ans.append(" [!]")
+            else
+                ans.append(" ")
+        }
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -51,7 +56,18 @@ fun SurveyQuestionsScreen(
                     JetSurveyScreen(
                         questions.value!!.form[questionindex.value],
                         questionState,
-                        onAnswer = { ans.add(it) })
+                        onAnswer = { respuesta ->
+                            var split = ans.split("[!]").toMutableList()
+                            split[questionindex.value] = respuesta.toString()
+                            ans.clear()
+                            split.forEachIndexed { index, questionState ->
+                                if(index < questions.value?.form!!.size -1)
+                                    ans.append(" [!]")
+                                else
+                                    ans.append(" ")
+                            }
+
+                        })
                     Log.d("respuesta3", ans.toString())
                 },
                 bottomBar = {
@@ -71,7 +87,7 @@ fun SurveyQuestionsScreen(
         }
         LaunchedEffect(sendInfo.value) {
             if (sendInfo.value) {
-                onAnswer(Answer((ans)))
+                //onAnswer(Answer((ans)))
                 Log.d("Respuesta", ans.toString())
             } else {
                 Log.d("Respuesta", "NOT SENDING INFO")
