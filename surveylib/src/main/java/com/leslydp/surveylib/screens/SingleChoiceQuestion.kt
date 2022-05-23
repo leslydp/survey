@@ -8,21 +8,17 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.leslydp.surveylib.R
-import com.ondev.imageblurkt_lib.ImageBlur
 
 @Composable
 internal fun SingleChoiceQuestionCMP(
     options: List<String>,
-    questionState: MutableState<Boolean>,
+    //questionState: MutableState<Boolean>,
     onAnswerSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var checkedState by remember { mutableStateOf(0) }
-    questionState.value = true
+    //questionState.value = true
 
     Column(modifier = modifier) {
         options.forEach { text ->

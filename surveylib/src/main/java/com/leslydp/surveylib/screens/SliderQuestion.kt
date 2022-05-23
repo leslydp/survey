@@ -14,14 +14,14 @@ import androidx.compose.ui.unit.dp
 @Composable
 internal fun SliderQuestionCMP(
     options: List<String>,
-    questionState: MutableState<Boolean>,
+   // questionState: MutableState<Boolean>,
     onAnswerSelected: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var sliderPosition by remember {
         mutableStateOf(0f)
     }
-    questionState.value = true
+    //questionState.value = true
     Row(modifier = modifier) {
 
         Slider(

@@ -19,10 +19,10 @@ import com.leslydp.surveylib.model.SQuestion
 @Composable
 fun JetSurveyScreen(
     question: Form,
-    questionState: MutableState<Boolean>,
-    onAnswer: (String) -> Unit
+    //questionState: MutableState<Boolean>,
+    onAnswer: (MutableList<String>) -> Unit
 ) {
-    var sendInfo = remember{mutableStateOf(false)}
+    val sendInfo = remember{mutableStateOf(false)}
     val ans =
         mutableListOf<String>()  //Puede ser VAL porq lo que puede cambiar es el contenido interno y no la referencia al objecto
     //list.forEach { question ->
@@ -64,25 +64,32 @@ fun JetSurveyScreen(
                             Log.d("tag",option)
                             Log.d("tag",url.toString())
                         }
-                        MultipleChoiceIconQuestionCMP(options,questionState, url, blurhash, { idq, valor ->
+                        MultipleChoiceIconQuestionCMP(options, url, blurhash,ans, { idq, valor ->
                             val compareTo = valor.compareTo(false)
-                            respuesta[idq] = compareTo.toByte()
+                            if(ans.size > idq){
+                                ans[idq] = compareTo.toString()
+                            }
+                            else{
+                                ans.add(compareTo.toString())
+                            }
+                            onAnswer(ans)
+                            //respuesta[idq] = compareTo.toByte()
                             Log.d("icon", respuesta.toString())
-                            ans.add(respuesta.toString())
+                            //ans.add(respuesta.toString())
                             //onAnswer(ans.toString())
                         }
                         )
                     }
 
                     else{
-                        MultipleChoiceQuestionCMP(question.options, questionState,onAnswerSelected = { idq, valor ->
+                       /* MultipleChoiceQuestionCMP(question.options,onAnswerSelected = { idq, valor ->
                             val compareTo = valor.compareTo(false)
                             respuesta[idq] = compareTo.toByte()
                             Log.d("noicon", respuesta.toString())
                             ans.add(respuesta.toString())
                             //onAnswer(ans.toString())
 
-                        })
+                        })*/
 
                     }
 
@@ -112,7 +119,7 @@ fun JetSurveyScreen(
                         }
                         SingleChoiceIconQuestionCMP(
                             options = options,
-                            questionState = questionState,
+                            //questionState = questionState,
                             url = url,
                             blurhash = blurhash,
                             onAnswerSelected = {id ->
@@ -126,7 +133,7 @@ fun JetSurveyScreen(
                         )
                     }
                     else{
-                        SingleChoiceQuestionCMP(question.options,questionState, onAnswerSelected = { id ->
+                        SingleChoiceQuestionCMP(question.options, onAnswerSelected = { id ->
                             if (respuesta.indexOf(1) > -1)
                                 respuesta[respuesta.indexOf(1)] = 0
                             respuesta[id] = 1
@@ -141,7 +148,7 @@ fun JetSurveyScreen(
                 }
                 3 -> {
                     var respuesta = 0f
-                    SliderQuestionCMP(question.options,questionState, onAnswerSelected = {
+                    SliderQuestionCMP(question.options, onAnswerSelected = {
                         Log.d("slider", it.toString())
                         respuesta = it
                         ans.add("[!]${respuesta}")
@@ -157,7 +164,7 @@ fun JetSurveyScreen(
                         respuesta = it
 
                         //onAnswer(ans.toString())
-                    },modifier = Modifier, questionState)
+                    },modifier = Modifier)
                     //onAnswer(respuesta)
                     ans.add(respuesta)
                 }
@@ -169,7 +176,7 @@ fun JetSurveyScreen(
     // }
     LaunchedEffect(sendInfo.value) {
         if(sendInfo.value){
-            onAnswer((ans.toString()))
+            //onAnswer((ans.toString()))
             Log.d("Respuesta", ans.toString())
         }else{
             Log.d("Respuesta", "NOT SENDING INFO")

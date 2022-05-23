@@ -17,14 +17,14 @@ import com.ondev.imageblurkt_lib.ImageBlur
 @Composable
 internal fun SingleChoiceIconQuestionCMP(
     options: List<String>,
-    questionState: MutableState<Boolean>,
+    //questionState: MutableState<Boolean>,
     url: List<String>,
     blurhash: List<String>,
     onAnswerSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var checkedState by remember { mutableStateOf(-1) }
-    questionState.value = true
+    //questionState.value = true
     Column(modifier = modifier) {
         options.forEach { option ->
 

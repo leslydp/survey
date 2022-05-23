@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,20 +22,36 @@ import com.leslydp.surveylib.viewModel.SurveyViewModel
 
 @Composable
 fun SurveyQuestionsScreen(
+    //questions: SurveyState.Questions,
     onBackPressed: () -> Unit,
     onDonePressed: () -> Unit,
     onAnswer: (Answer) -> Unit,
     surveyViewModel: SurveyViewModel = hiltViewModel()
 ) {
+    val questions = surveyViewModel.uiState?.value
+
     val questionindex = remember{ mutableStateOf(0)}
     val sendInfo = remember {
         mutableStateOf(false)
     }
-    val ans =
-        mutableListOf<String>()
-    val questionState = remember{ mutableStateOf(false)}
-    val questions = surveyViewModel.surveyQuestion.collectAsState()
-    if(questions.value!= null) {
+    var ans = StringBuilder()
+
+
+
+    //val questionState = remember{ mutableStateOf(false)}
+    //val questions = surveyViewModel.surveyQuestion.collectAsState()
+    if(questions!= null) {
+        Log.d("null","Hola")
+
+        questions.questionsState.forEachIndexed { index, questionState ->
+            if(index < questions.questionsState.size-1)
+                ans.append(" [!]")
+            else
+                ans.append(" ")
+        }
+        val questionState = remember(questions.currentQuestionIndex) {
+            questions.questionsState[questions.currentQuestionIndex]
+        }
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -42,22 +61,34 @@ fun SurveyQuestionsScreen(
             Scaffold(
                 topBar = {
                     SurveyTopAppBar(
-                        questionIndex = questionindex.value,
-                        totalQuestionsCount = questions.value?.form!!.size,
+                        questionIndex = questionState.questionIndex,
+                        totalQuestionsCount = questionState.totalQuestionsCount,
                         onBackPressed = onBackPressed
                     )
                 },
                 content = {
                     JetSurveyScreen(
-                        questions.value!!.form[questionindex.value],
-                        questionState,
-                        onAnswer = { ans.add(it) })
+                        questionState.question,
+                       // questionState,
+                        onAnswer = {respuesta ->
+                            var split = ans.split("[!]").toMutableList()
+                            split[questionState.questionIndex] = respuesta.toString()
+                            ans.clear()
+                            split.forEachIndexed { index, questionState ->
+                                if(index < questions.questionsState.size-1)
+                                    ans.append(" [!]")
+                                else
+                                    ans.append(" ")
+                            }
+
+                        }
+                    )
                     Log.d("respuesta3", ans.toString())
                 },
                 bottomBar = {
                     SurveyBottomBar(
-                        questionIndex = questionindex.value,
-                        questionSize = questions.value?.form!!.size,
+                        questionIndex = questionState.questionIndex,
+                        questionSize = questionState.totalQuestionsCount,
                         onPreviousPressed = { questionindex.value -= 1 },
                         onNextPressed = { questionindex.value += 1 },
                         onDonePressed = {
@@ -71,7 +102,7 @@ fun SurveyQuestionsScreen(
         }
         LaunchedEffect(sendInfo.value) {
             if (sendInfo.value) {
-                onAnswer(Answer((ans)))
+                //onAnswer(Answer((ans)))
                 Log.d("Respuesta", ans.toString())
             } else {
                 Log.d("Respuesta", "NOT SENDING INFO")

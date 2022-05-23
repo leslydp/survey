@@ -21,16 +21,25 @@ import com.ondev.imageblurkt_lib.ImageBlur
 internal fun MultipleChoiceIconQuestionCMP(
 
     options: List<String>,
-    questionState: MutableState<Boolean>,
+    //questionState: MutableState<Boolean>,
     url: List<String>,
     blurhash: List<String>,
+    answer: MutableList<String>,
     onAnswerSelected: (Int, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    questionState.value = true
+    //questionState.value = true
     Column(modifier = modifier) {
+        var i = 0
         for (option in options) {
-            var checkedState by remember { mutableStateOf(false) }
+            var checkValue = false
+            if(answer.size > i){
+                if(answer[i]== "1"){
+                    checkValue = true
+                }
+            }
+            var checkedState by remember { mutableStateOf(checkValue) }
+            i += 1
             val answerBorderColor = if (checkedState) {
                 MaterialTheme.colors.primary.copy(alpha = 0.5f)
             } else {

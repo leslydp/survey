@@ -1,15 +1,14 @@
 package com.leslydp.surveylib.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.leslydp.surveylib.model.QuestionState
 
 @Composable
 internal fun SurveyBottomBar(
@@ -18,7 +17,7 @@ internal fun SurveyBottomBar(
     onPreviousPressed: () -> Unit,
     onNextPressed: () -> Unit,
     onDonePressed: () -> Unit,
-    questionState: MutableState<Boolean>
+    questionState: QuestionState
 ) {
     Surface(
         elevation = 7.dp,
@@ -47,10 +46,10 @@ internal fun SurveyBottomBar(
                         .weight(1f)
                         .height(48.dp),
                     onClick = onDonePressed,
-                    enabled = questionState.value
+                    enabled = questionState.showDone
                 ) {
                     Text(text = "DONE")
-                    Log.d("estadoBotton",questionState.value.toString())
+                    //Log.d("estadoBotton",questionState.value.toString())
                 }
             } else {
                 Button(
@@ -58,7 +57,7 @@ internal fun SurveyBottomBar(
                         .weight(1f)
                         .height(48.dp),
                     onClick = onNextPressed,
-                    enabled = questionState.value
+                    enabled = questionState.enableNext
                 ) {
                     Text(text = "NEXT")
                 }
